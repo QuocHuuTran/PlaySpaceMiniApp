@@ -9,7 +9,6 @@ import SnackbarProvider from "zmp-ui/snackbar-provider";
 import { AppProps } from "zmp-ui/app";
 import { Navigate } from "react-router-dom";
 import HomePage from "@/pages/index";
-import LoadingPage from "@/pages/loading";
 import { Suspense } from "react";
 const Layout = () => {
   return (

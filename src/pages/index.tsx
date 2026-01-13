@@ -7,10 +7,6 @@ import {
   getPhoneNumber,
   getSetting,
   authorize,
-  getUserInfo,
-  login,
-  followOA,
-  showOAWidget,
   events,
 } from "zmp-sdk/apis";
 import { Button, Page, Spinner, Text } from "zmp-ui";
@@ -18,6 +14,25 @@ import background from "@/static/bg.svg";
 export default function HomePage() {
   const isCalled = useRef(false);
   const [loading, setLoading] = useState(true);
+  const generateTargetUrl = async () => {
+    const params = await getRouteParams();
+    const code = params?.code || "";
+    const booking = params?.bk;
+    let finalPaths = "";
+    let tokenZalo = "";
+    let tokenPhone = ""; 
+    
+    if (booking === "true") {
+      tokenZalo = await getAccessToken();
+      const phoneRes = await getPhoneNumber();
+      tokenPhone = phoneRes.token ?? "";
+      finalPaths = `s/${code}`;
+    } else {
+      finalPaths = `space/0001096`;
+    }
+
+    return `https://b.datlich.net/${finalPaths}?tokenName=${tokenZalo}&tokenPhone=${tokenPhone}`;
+  };
   useEffect(() => {
     const handleVisibilityChange = () => {
       // Khi người dùng bấm Back từ Webview, Mini App sẽ Visible trở lại
@@ -44,24 +59,7 @@ export default function HomePage() {
             scopes: ["scope.userInfo", "scope.userPhonenumber"],
           });
         }
-        const token = await getAccessToken();
-        const tokenPhone = await getPhoneNumber();
-        const phone = tokenPhone.token;
-        if (token && phone) {
-          sessionStorage.setItem("zalo_token", token);
-          sessionStorage.setItem("zalo_token_phone", phone);
-        }
-        const params = await getRouteParams();
-        const code = params?.code;
-        let finalPath = "";
-        if (code) {
-          finalPath = `s/${code}`;
-          sessionStorage.setItem("launch_path", finalPath);
-        }
-        const targetUrl = finalPath
-          ? `https://b.datlich.net/${finalPath}?tokenName=${token}&tokenPhone=${phone}`
-          : `https://b.datlich.net?tokenName=${token}&tokenPhone=${phone}`;
-          console.log("hhh", targetUrl)
+        const targetUrl = await generateTargetUrl();
         openWebview({
           url: targetUrl,
           config: { style: "normal" },
@@ -76,27 +74,30 @@ export default function HomePage() {
         closeApp();
       }
     };
-    
+
     if (!isCalled.current) {
       initApp();
       isCalled.current = true;
     }
-   
+
     return () => {
       events.off("appShow", handleAppShow);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
 
-  const openBooking = () => {
-    
-    const tokenZalo = sessionStorage.getItem("zalo_token");
-    const tokenPhone = sessionStorage.getItem("zalo_token_phone");
-    const url = `https://b.datlich.net?tokenName=${tokenZalo}&tokenPhone=${tokenPhone}`;
-    openWebview({
-      url,
-      config: { style: "normal" },
-    });
+  const openBooking = async () => {
+    setLoading(true);
+    try {
+      const url = await generateTargetUrl();
+      openWebview({
+        url,
+        config: { style: "normal" },
+        fail: () => setLoading(false)
+      });
+    } catch (e) {
+      setLoading(false);
+    }
   };
   const logoUrl = "https://app.playspace.vn/playspace_assets/img/PlaySpace.png";
   if (loading) {

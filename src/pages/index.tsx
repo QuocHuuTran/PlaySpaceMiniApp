@@ -20,7 +20,7 @@ export default function HomePage() {
   const isCalled = useRef(false);
   const [loading, setLoading] = useState(true);
   const [courtData, setCourtData] = useState<CourtInfo | null>(null);
-  const [oaIdFromParams, setOaIdFromParams] = useState("4580885597509011549");
+  const [oaIdFromParams, setOaIdFromParams] = useState("");
   const renderOA = (id: string | null = null) => {
     const targetOaId = id || oaIdFromParams;
     setTimeout(() => {
@@ -98,7 +98,7 @@ export default function HomePage() {
       const customOaId = params?.oaId;
       if (comId) {
         const data = await fetchCourtInfo(comId);
-        if(data.Message === "Success"){
+        if (data.Message === "Success") {
           setCourtData(data);
         }
       }
@@ -145,7 +145,7 @@ export default function HomePage() {
           backgroundPosition: "center",
         }}
       >
-        <div className="flex items-center text-white" >
+        <div className="flex items-center text-white">
           <img src={imgUrl} alt="Logo" />
         </div>
       </div>
@@ -189,7 +189,9 @@ export default function HomePage() {
           >
             Tiếp tục với Zalo
           </Button>
-          <div id="oaWidget" className="my-2" />
+          {oaIdFromParams !== null && oaIdFromParams !== "" && (
+            <div id="oaWidget" className="my-2" />
+          )}
           <p className="text-[10px] text-gray-400 mt-4 px-4 leading-tight">
             Bằng việc tiếp tục, bạn đồng ý với Điều khoản sử dụng của chúng tôi.
           </p>

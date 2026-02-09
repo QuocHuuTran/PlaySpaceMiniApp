@@ -54,7 +54,7 @@ export default function HomePage() {
       const booking = params?.bk === "true";
       let finalPaths = "";
       let authData = { tokenZalo: "", tokenPhone: "" };
-      if (booking || code !== null || code !== "") {
+      if (booking || code !== null) {
         authData = await getAuthData();
         finalPaths = `s/${code}`;
       } else {
@@ -94,7 +94,7 @@ export default function HomePage() {
 
     const checkAutoInit = async () => {
       const params = await getRouteParams();
-      const comId = params?.comId ? params?.comId : "0001125";
+      const comId = params?.comId ?? "0001125";
       const customOaId = params?.oaId;
       if (comId) {
         const data = await fetchCourtInfo(comId);
@@ -187,7 +187,7 @@ export default function HomePage() {
             onClick={() => openBooking(false)}
             fullWidth
           >
-            Tiếp tục với Zalo
+            Bắt đầu đặt sân
           </Button>
           {oaIdFromParams !== null && oaIdFromParams !== "" && (
             <div id="oaWidget" className="my-2" />
